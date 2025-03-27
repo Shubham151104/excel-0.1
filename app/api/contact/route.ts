@@ -1,57 +1,61 @@
 import { NextResponse } from "next/server"
-import mongoose from "mongoose"
+import { connectDB } from "@/lib/mongodb"
+import Contact from "@/models/Contact"
 
-// Connect to MongoDB (only once)
-let isConnected = false
-const connectDB = async () => {
-  if (isConnected) return
-
+export async function POST(request: Request) {
   try {
-    await mongoose.connect(process.env.MONGODB_URI as string)
-    isConnected = true
-    console.log("MongoDB connected")
+    const data = await request.json()
+    
+    // Validate required fields
+    const requiredFields = ['name', 'email', 'subject', 'message']
+    for (const field of requiredFields) {
+      if (!data[field]) {
+        return NextResponse.json(
+          { error: `${field} is required` },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Connect to MongoDB
+    await connectDB()
+
+    // Create new contact
+    const newContact = new Contact(data)
+    await newContact.save()
+
+    return NextResponse.json(
+      { message: "Message sent successfully!" },
+      { status: 200 }
+    )
   } catch (error) {
-    console.error("MongoDB connection error:", error)
+    console.error("Error in contact API:", error)
+    return NextResponse.json(
+      { error: "Failed to process your request" },
+      { status: 500 }
+    )
   }
 }
 
-// Contact form schema
-const contactSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  subject: String,
-  message: String,
-  createdAt: { type: Date, default: Date.now },
-})
-
-// Get the model or create it if it doesn't exist
-const Contact = mongoose.models.Contact || mongoose.model("Contact", contactSchema)
-
-export async function POST(request: Request) {
-  await connectDB()
-
+// Add a GET route to retrieve submissions (protected route)
+export async function GET(request: Request) {
   try {
-    const body = await request.json()
-    const { name, email, subject, message } = body
+    // Get the cookie from the request
+    const token = request.cookies.get('admin_token');
 
-    // Basic validation
-    if (!name || !email || !subject || !message) {
-      return NextResponse.json({ error: "All fields are required" }, { status: 400 })
+    if (!token || token.value !== process.env.ADMIN_API_KEY) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const newContact = new Contact({
-      name,
-      email,
-      subject,
-      message,
-    })
-
-    await newContact.save()
-
-    return NextResponse.json({ message: "Form submitted successfully" }, { status: 201 })
+    await connectDB();
+    const contacts = await Contact.find().sort({ createdAt: -1 });
+    return NextResponse.json(contacts, { status: 200 });
   } catch (error) {
-    console.error("Error submitting form:", error)
-    return NextResponse.json({ error: "An error occurred while submitting the form" }, { status: 500 })
+    console.error("Error fetching contacts:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch contacts" },
+      { status: 500 }
+    );
   }
 }
 
