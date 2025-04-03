@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { connectDB } from "@/lib/mongodb"
 import Contact from "@/models/Contact"
+import { sendThankYouEmail } from "@/lib/email"
 
 export async function POST(request: Request) {
   try {
@@ -23,6 +24,9 @@ export async function POST(request: Request) {
     // Create new contact
     const newContact = new Contact(data)
     await newContact.save()
+
+    // Send thank you email
+    await sendThankYouEmail(data.email, data.name)
 
     return NextResponse.json(
       { message: "Message sent successfully!" },
