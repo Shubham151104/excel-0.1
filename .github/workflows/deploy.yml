@@ -28,7 +28,7 @@ jobs:
         run: ls -la  # Ensure .env is in the project root
 
       - name: Install Dependencies
-        run: npm install
+        run: npm install --force
 
       - name: Build the Project
         run: npm run build  # This should pick up the .env file
