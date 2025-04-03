@@ -34,7 +34,7 @@ jobs:
         run: npm run build  # This should pick up the .env file
 
       - name: Start the Development Server
-        run: npm run dev  # Start the server in dev mode
+        run: npm start  # Start the server in dev mode
         env:
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
           ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
