@@ -45,7 +45,9 @@ jobs:
         run: export NODE_OPTIONS="--max-old-space-size=4096"
 
       - name: Log Start Time
-        run: echo "Start Time: $(date)"
+        run: |
+          echo "Start Time: $(date)"
+
 
       - name: Build the Project
         run: npm run build  # Run production build (faster than dev mode)
