@@ -42,12 +42,13 @@ jobs:
         run: echo "TMPDIR=/dev/shm" >> $GITHUB_ENV
 
       - name: Increase Memory Limit
-        run: export NODE_OPTIONS="--max-old-space-size=4096"
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+        run: echo "Memory limit increased"
 
       - name: Log Start Time
         run: |
           echo "Start Time: $(date)"
-
 
       - name: Build the Project
         run: npm run build  # Run production build (faster than dev mode)
@@ -56,4 +57,5 @@ jobs:
         run: npm start
 
       - name: Log End Time
-        run: echo "End Time: $(date)"
+        run: |
+          echo "End Time: $(date)"
