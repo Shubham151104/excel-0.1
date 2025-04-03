@@ -1,0 +1,43 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - master # Change this if needed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Create .env File
+        run: |
+          echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" >> .env
+          echo "ADMIN_USERNAME=${{ secrets.ADMIN_USERNAME }}" >> .env
+          echo "ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}" >> .env
+          echo "ADMIN_API_KEY=${{ secrets.ADMIN_API_KEY }}" >> .env
+          echo "NEXT_PUBLIC_ADMIN_API_KEY=${{ secrets.NEXT_PUBLIC_ADMIN_API_KEY }}" >> .env
+
+      - name: Debug .env File
+        run: cat .env  # Check if .env is created (GitHub will mask sensitive values)
+
+      - name: List Files to Verify .env Exists
+        run: ls -la  # Ensure .env is in the project root
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build the Project
+        run: npm run build  # This should pick up the .env file
+
+      - name: Start the Development Server
+        run: npm run dev  # Start the server in dev mode
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          ADMIN_API_KEY: ${{ secrets.ADMIN_API_KEY }}
+          NEXT_PUBLIC_ADMIN_API_KEY: ${{ secrets.NEXT_PUBLIC_ADMIN_API_KEY }}
