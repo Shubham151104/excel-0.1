@@ -64,7 +64,7 @@ const Header = () => {
         </nav>
 
         <div className="flex items-center space-x-4">
-          <a href="tel:+919442142112" className="hidden lg:flex items-center text-blue-600 hover:text-blue-700">
+          <a href="tel:+919408266995" className="hidden lg:flex items-center text-blue-600 hover:text-blue-700">
             <Phone className="w-4 h-4 mr-2" />
             <span>Call: +91 9408299665</span>
           </a>
